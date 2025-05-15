@@ -1,11 +1,27 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
 import { ProductsModule } from './products/products.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 import * as process from 'node:process';
 
 @Module({
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  imports: [MongooseModule.forRoot(process.env.MONGODB_URI), ProductsModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    MongooseModule.forRoot(<string>process.env['MONGODB_URI']),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.registerAsync({
+      useFactory: () => ({
+        secret: process.env.MONGODB_URI,
+        signOptions: { expiresIn: process.env.MONGODB_URI },
+      }),
+    }),
+    ProductsModule,
+    UsersModule,
+    AuthModule,
+  ],
 })
 export class AppModule {}
