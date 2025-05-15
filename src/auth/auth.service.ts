@@ -1,7 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
+import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
 export class AuthService {
@@ -9,6 +10,7 @@ export class AuthService {
     private usersSvc: UsersService,
     private jwtSvc: JwtService,
   ) {}
+
   private async validateUser(email: string, pass: string) {
     const user = await this.usersSvc.findByEmail(email);
     if (user && (await bcrypt.compare(pass, user.password))) {
@@ -20,6 +22,7 @@ export class AuthService {
     return null;
   }
 
+  @UseGuards(AuthGuard('jwt'))
   async register(dto: any) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return this.usersSvc.create(dto);
