@@ -1,13 +1,29 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Req,
+  ForbiddenException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { CreateProductDto } from '../products/dto/create-product.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authSvc: AuthService) {}
+  constructor(private readonly authSvc: AuthService) {}
 
+  @UseGuards(AuthGuard('jwt'))
   @Post('register')
-  register(@Body() body: any) {
-    return this.authSvc.register(body);
+  async register(@Body() dto: CreateProductDto, @Req() req) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (req.user.clearanceLevel < 3) {
+      throw new ForbiddenException(
+        'Your clearance level is is too low to register new users.',
+      );
+    }
+    return this.authSvc.register(dto);
   }
 
   @Post('login')
