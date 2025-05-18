@@ -8,7 +8,15 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
 @Module({
-  imports: [ConfigModule, UsersModule, PassportModule, JwtModule],
+  imports: [
+    ConfigModule,
+    UsersModule,
+    PassportModule,
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || 'fallback-secret',
+      signOptions: { expiresIn: '60m' },
+    }),
+  ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
 })

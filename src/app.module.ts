@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ProductsModule } from './products/products.module';
@@ -14,10 +14,12 @@ import * as process from 'node:process';
     MongooseModule.forRoot(<string>process.env['MONGODB_URI']),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
-      useFactory: () => ({
-        secret: 'SECRET',
-        signOptions: { expiresIn: '30m' },
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET') || 'fallback-secret',
+        signOptions: { expiresIn: '100m' },
       }),
+      inject: [ConfigService],
     }),
     ProductsModule,
     UsersModule,

@@ -21,20 +21,27 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('Invalid Credentials');
     const payload = {
       sub: user.email,
+      clearanceLevel: user.clearanceLevel,
     };
-
     return {
       accessToken: await this.jwtSvc.signAsync(payload),
-      clearanceLevel: user.clearanceLevel,
     };
   }
 
   private async validateUser(email: string, pass: string) {
-    const user = await this.usersSvc.findByEmail(email);
-    if (user && (await bcrypt.compare(pass, user.password))) {
-      const { password, ...rest } = user.toObject(); //come back
-      return rest;
+    try {
+      const user = await this.usersSvc.findByEmail(email);
+      if (user) {
+        const passwordMatch = await bcrypt.compare(pass, user.password);
+        if (passwordMatch) {
+          const { password, ...rest } = user.toObject();
+          return rest;
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Error in validateUser:', error);
+      return null;
     }
-    return null;
   }
 }
