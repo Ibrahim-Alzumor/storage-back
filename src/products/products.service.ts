@@ -17,7 +17,7 @@ export class ProductsService {
   }
 
   async findAll(): Promise<Product[]> {
-    return this.productModel.find().exec();
+    return this.productModel.find({ isEmpty: false }).exec();
   }
 
   async findOne(id: number): Promise<Product> {
@@ -35,8 +35,19 @@ export class ProductsService {
   }
 
   async remove(id: number): Promise<void> {
-    const res = await this.productModel.deleteOne({ id }).exec();
-    if (res.deletedCount === 0)
+    const res = await this.productModel
+      .updateOne({ id }, { $set: { isEmpty: true } })
+      .exec();
+    if (res.matchedCount === 0)
+      throw new NotFoundException(`No Product with id ${id}`);
+  }
+
+  async addStock(id: number, amountToAdd: number): Promise<void> {
+    const res = await this.productModel
+      .updateOne({ id }, { $inc: { stock: amountToAdd } })
+      .exec();
+
+    if (res.matchedCount === 0)
       throw new NotFoundException(`No Product with id ${id}`);
   }
 }

@@ -1,20 +1,21 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Param,
-  Put,
+  Controller,
   Delete,
-  ParseIntPipe,
-  UseGuards,
-  Req,
   ForbiddenException,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Put,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ProductsService } from './products.service';
 import { AuthGuard } from '@nestjs/passport';
+import { ProductsService } from './products.service';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('products')
@@ -23,7 +24,6 @@ export class ProductsController {
 
   @Post()
   create(@Body() dto: CreateProductDto, @Req() req) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (req.user.clearanceLevel < 3) {
       throw new ForbiddenException(
         'Your not authorized to add a new product only managers and above are allowed',
@@ -48,7 +48,6 @@ export class ProductsController {
     @Body() dto: UpdateProductDto,
     @Req() req,
   ) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (req.user.clearanceLevel < 2) {
       throw new ForbiddenException(
         'Your not authorized to update a product only associates and above are allowed',
@@ -59,12 +58,25 @@ export class ProductsController {
 
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number, @Req() req) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (req.user.clearanceLevel < 3) {
       throw new ForbiddenException(
         'Your not authorized to delete a product only managers and above are allowed',
       );
     }
     return this.svc.remove(id);
+  }
+
+  @Patch(':id/add-stock')
+  addStock(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('amountToAdd', ParseIntPipe) amountToAdd: number,
+    @Req() req,
+  ) {
+    if (req.user.clearanceLevel < 2) {
+      throw new ForbiddenException(
+        'You are not authorized to modify stock levels. Only staff and above are allowed.',
+      );
+    }
+    return this.svc.addStock(id, amountToAdd);
   }
 }

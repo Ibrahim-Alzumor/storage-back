@@ -11,39 +11,30 @@ export class AuthService {
     private jwtSvc: JwtService,
   ) {}
 
-  private async validateUser(email: string, pass: string) {
-    const user = await this.usersSvc.findByEmail(email);
-    if (user && (await bcrypt.compare(pass, user.password))) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unused-vars
-      const { password, ...rest } = user.toObject();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return rest;
-    }
-    return null;
-  }
-
   @UseGuards(AuthGuard('jwt'))
   async register(dto: any) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return this.usersSvc.create(dto);
   }
 
   async login(creds: { email: string; password: string }) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const user = await this.validateUser(creds.email, creds.password);
     if (!user) throw new UnauthorizedException('Invalid Credentials');
-
     const payload = {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-      sub: user.id,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-      clearanceLevel: user.clearanceLevel,
+      sub: user.email,
     };
 
     return {
-      accessToken: this.jwtSvc.sign(payload),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      clearanceLevel: payload.clearanceLevel,
+      accessToken: await this.jwtSvc.signAsync(payload),
+      clearanceLevel: user.clearanceLevel,
     };
+  }
+
+  private async validateUser(email: string, pass: string) {
+    const user = await this.usersSvc.findByEmail(email);
+    if (user && (await bcrypt.compare(pass, user.password))) {
+      const { password, ...rest } = user.toObject(); //come back
+      return rest;
+    }
+    return null;
   }
 }

@@ -15,8 +15,8 @@ import * as process from 'node:process';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       useFactory: () => ({
-        secret: process.env.MONGODB_URI,
-        signOptions: { expiresIn: process.env.MONGODB_URI },
+        secret: 'SECRET',
+        signOptions: { expiresIn: '30m' },
       }),
     }),
     ProductsModule,

@@ -9,7 +9,7 @@ import { AuthService } from './auth.service';
 
 @Module({
   imports: [ConfigModule, UsersModule, PassportModule, JwtModule],
-  controllers: [AuthController, JwtStrategy],
-  providers: [AuthService],
+  controllers: [AuthController],
+  providers: [AuthService, JwtStrategy],
 })
 export class AuthModule {}

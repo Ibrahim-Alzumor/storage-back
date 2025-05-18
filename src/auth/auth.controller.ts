@@ -17,7 +17,6 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @Post('register')
   async register(@Body() dto: CreateProductDto, @Req() req) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (req.user.clearanceLevel < 3) {
       throw new ForbiddenException(
         'Your clearance level is is too low to register new users.',

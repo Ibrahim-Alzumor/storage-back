@@ -1,9 +1,9 @@
 import {
   IsEmail,
-  IsString,
   IsNotEmpty,
   IsNumber,
   IsOptional,
+  IsString,
 } from 'class-validator';
 
 export class CreateUserDto {

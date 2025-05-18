@@ -13,10 +13,10 @@ export class UsersService {
     const hashed = await bcrypt.hash(dto.password, 10);
     const created = new this.userModel({ ...dto, password: hashed });
     const user = await created.save();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...rest } = user.toObject();
     return rest;
   }
+
   async findByEmail(email: string): Promise<UserDocument | null> {
     return this.userModel.findOne({ email }).exec();
   }
