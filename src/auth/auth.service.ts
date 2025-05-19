@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
-import { AuthGuard } from '@nestjs/passport';
+import { AuthGuard } from './auth.guard';
 
 @Injectable()
 export class AuthService {
@@ -11,7 +11,7 @@ export class AuthService {
     private jwtSvc: JwtService,
   ) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard)
   async register(dto: any) {
     return this.usersSvc.create(dto);
   }

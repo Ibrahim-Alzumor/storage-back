@@ -17,5 +17,5 @@ export class CreateProductDto {
   @IsString()
   @IsOptional()
   description?: string;
-  isEmpty: boolean;
+  isEmpty?: boolean;
 }

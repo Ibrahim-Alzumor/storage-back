@@ -17,6 +17,8 @@ export class ProductsService {
 
   async create(dto: CreateProductDto): Promise<Product> {
     const created = new this.productModel(dto);
+    created.id = Date.now();
+    created.isEmpty = false;
     return await created.save();
   }
 

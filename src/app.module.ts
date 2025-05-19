@@ -7,6 +7,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import * as process from 'node:process';
+import { jwtConstants } from './auth/constants';
 
 @Module({
   imports: [
@@ -15,8 +16,8 @@ import * as process from 'node:process';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') || 'fallback-secret',
+      useFactory: async () => ({
+        secret: jwtConstants.secret,
         signOptions: { expiresIn: '100m' },
       }),
       inject: [ConfigService],
