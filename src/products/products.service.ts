@@ -41,6 +41,7 @@ export class ProductsService {
   }
 
   async update(id: number, dto: UpdateProductDto): Promise<Product> {
+    dto.isEmpty = false;
     const updated = await this.productModel
       .findOneAndUpdate({ id }, dto, { new: true })
       .exec();
@@ -50,7 +51,7 @@ export class ProductsService {
 
   async remove(id: number): Promise<void> {
     const res = await this.productModel
-      .updateOne({ id }, { $set: { isEmpty: true } })
+      .updateOne({ id }, { $set: { isEmpty: true, stock: 0 } })
       .exec();
     if (res.matchedCount === 0)
       throw new NotFoundException(`No Product with id ${id}`);

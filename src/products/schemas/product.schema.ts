@@ -17,7 +17,7 @@ export class Product {
   image: string;
   @Prop()
   description: string;
-  @Prop()
+  @Prop({ default: false })
   isEmpty: boolean;
 }
 

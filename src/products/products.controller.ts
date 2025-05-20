@@ -31,14 +31,14 @@ export class ProductsController {
     return this.svc.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.svc.findOne(id);
-  }
-
   @Get('search')
   async findByName(@Query('name') name: string) {
     return this.svc.findByName(name);
+  }
+  
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.svc.findOne(id);
   }
 
   @Put(':id')
