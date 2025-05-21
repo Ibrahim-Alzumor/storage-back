@@ -19,6 +19,7 @@ export class ProductsService {
     const created = new this.productModel(dto);
     created.id = Date.now();
     created.isEmpty = false;
+    created.barcode = Date.now();
     return await created.save();
   }
 
@@ -74,6 +75,22 @@ export class ProductsService {
     }
     await this.productModel
       .updateOne({ id }, { $inc: { stock: -amount } })
+      .exec();
+  }
+
+  async findByBarcode(barcodeId: number): Promise<Product | null> {
+    return this.productModel.findOne({ barcodeId }).exec();
+  }
+
+  async assignBarcode(id: number, barcodeId: number): Promise<void> {
+    const existing = await this.productModel.findOne({ barcodeId }).exec();
+    if (existing) {
+      throw new BadRequestException(
+        `Barcode ${barcodeId} is already assigned to another product`,
+      );
+    }
+    await this.productModel
+      .updateOne({ id }, { $set: { barcode: barcodeId } })
       .exec();
   }
 }

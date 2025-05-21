@@ -19,6 +19,8 @@ export class Product {
   description: string;
   @Prop({ default: false })
   isEmpty: boolean;
+  @Prop({ unique: true })
+  barcode: number;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
