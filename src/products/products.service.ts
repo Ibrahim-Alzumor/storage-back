@@ -19,7 +19,7 @@ export class ProductsService {
     const created = new this.productModel(dto);
     created.id = Date.now();
     created.isEmpty = false;
-    created.barcode = Date.now();
+    created.barcode = '';
     return await created.save();
   }
 
@@ -58,13 +58,16 @@ export class ProductsService {
       throw new NotFoundException(`No Product with id ${id}`);
   }
 
-  async addStock(id: number, amount: number): Promise<void> {
-    const res = await this.productModel
-      .updateOne({ id }, { $inc: { stock: amount } })
+  async addStock(id: number, amount: number): Promise<Product> {
+    const product = await this.productModel
+      .findOneAndUpdate({ id }, { $inc: { stock: amount } }, { new: true })
       .exec();
 
-    if (res.matchedCount === 0)
+    if (!product) {
       throw new NotFoundException(`No Product with id ${id}`);
+    }
+
+    return product;
   }
 
   async removeStock(id: number, amount: number): Promise<void> {
@@ -78,11 +81,12 @@ export class ProductsService {
       .exec();
   }
 
-  async findByBarcode(barcodeId: number): Promise<Product | null> {
-    return this.productModel.findOne({ barcodeId }).exec();
+  async findByBarcode(barcode: string): Promise<Product | null> {
+    console.log('Searching for barcode:', barcode);
+    return this.productModel.findOne({ barcode }).exec();
   }
 
-  async assignBarcode(id: number, barcodeId: number): Promise<void> {
+  async assignBarcode(id: number, barcodeId: string): Promise<void> {
     const existing = await this.productModel.findOne({ barcodeId }).exec();
     if (existing) {
       throw new BadRequestException(

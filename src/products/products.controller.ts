@@ -15,6 +15,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductsService } from './products.service';
 import { AuthGuard } from '../auth/auth.guard';
+import { Product } from './schemas/product.schema';
 
 @UseGuards(AuthGuard)
 @Controller('products')
@@ -52,11 +53,11 @@ export class ProductsController {
   }
 
   @Patch(':id/add-stock')
-  addStock(
+  async addStock(
     @Param('id', ParseIntPipe) id: number,
     @Body('amount', ParseIntPipe) amount: number,
-  ) {
-    return this.productsService.addStock(id, amount);
+  ): Promise<Product> {
+    return await this.productsService.addStock(id, amount);
   }
 
   @Patch(':id/remove-stock')
@@ -68,14 +69,14 @@ export class ProductsController {
   }
 
   @Get('by-barcode/:barcodeId')
-  getByBarcode(@Param('barcodeId') barcodeId: number) {
+  getByBarcode(@Param('barcodeId') barcodeId: string) {
     return this.productsService.findByBarcode(barcodeId);
   }
 
   @Put(':id/barcode')
   assignBarcode(
     @Param('id', ParseIntPipe) id: number,
-    @Body('barcodeId') barcodeId: number,
+    @Body('barcodeId') barcodeId: string,
   ) {
     console.log(id);
     return this.productsService.assignBarcode(id, barcodeId);
