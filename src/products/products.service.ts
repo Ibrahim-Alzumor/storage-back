@@ -8,6 +8,7 @@ import { Model } from 'mongoose';
 import { Product } from './schemas/product.schema';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 
 @Injectable()
 export class ProductsService {
@@ -19,7 +20,7 @@ export class ProductsService {
     const created = new this.productModel(dto);
     created.id = Date.now();
     created.isEmpty = false;
-    created.barcode = '';
+    created.barcode = randomStringGenerator();
     return await created.save();
   }
 
