@@ -8,6 +8,10 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import * as process from 'node:process';
 import { jwtConstants } from './auth/constants';
+import { OrdersModule } from './orders/orders.module';
+import { LogsService } from './logs/logs.service';
+import { LogsController } from './logs/logs.controller';
+import { LogsModule } from './logs/logs.module';
 
 @Module({
   imports: [
@@ -25,6 +29,10 @@ import { jwtConstants } from './auth/constants';
     ProductsModule,
     UsersModule,
     AuthModule,
+    OrdersModule,
+    LogsModule,
   ],
+  providers: [LogsService],
+  controllers: [LogsController],
 })
 export class AppModule {}

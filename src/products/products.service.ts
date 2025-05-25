@@ -9,18 +9,29 @@ import { Product } from './schemas/product.schema';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
+import { LogsService } from '../logs/logs.service';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectModel('Product') private readonly productModel: Model<Product>,
+    private readonly logsService: LogsService,
   ) {}
 
-  async create(dto: CreateProductDto): Promise<Product> {
+  async create(dto: CreateProductDto, userEmail: string): Promise<Product> {
     const created = new this.productModel(dto);
     created.id = Date.now();
     created.isEmpty = false;
     created.barcode = randomStringGenerator();
+
+    await this.logsService.logAction({
+      userEmail,
+      action: `Added product ${created.name}`,
+      resourceType: 'product',
+      resourceId: created.id.toString(),
+      payload: dto,
+    });
+
     return await created.save();
   }
 
@@ -42,24 +53,48 @@ export class ProductsService {
       .exec();
   }
 
-  async update(id: number, dto: UpdateProductDto): Promise<Product> {
+  async update(
+    id: number,
+    dto: UpdateProductDto,
+    userEmail: string,
+  ): Promise<Product> {
     dto.isEmpty = false;
     const updated = await this.productModel
       .findOneAndUpdate({ id }, dto, { new: true })
       .exec();
     if (!updated) throw new NotFoundException(`No Product with id ${id}`);
+
+    await this.logsService.logAction({
+      userEmail,
+      action: `Updated product ${updated.name}`,
+      resourceType: 'product',
+      resourceId: updated.id.toString(),
+      payload: dto,
+    });
+
     return updated;
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, userEmail: string): Promise<void> {
+    const product = await this.findOne(id);
     const res = await this.productModel
       .updateOne({ id }, { $set: { isEmpty: true, stock: 0 } })
       .exec();
     if (res.matchedCount === 0)
       throw new NotFoundException(`No Product with id ${id}`);
+    await this.logsService.logAction({
+      userEmail,
+      action: `Removed product ${product.name}`,
+      resourceType: 'product',
+      resourceId: product.id.toString(),
+    });
   }
 
-  async addStock(id: number, amount: number): Promise<Product> {
+  async addStock(
+    id: number,
+    amount: number,
+    userEmail: string,
+  ): Promise<Product> {
     const product = await this.productModel
       .findOneAndUpdate({ id }, { $inc: { stock: amount } }, { new: true })
       .exec();
@@ -68,18 +103,47 @@ export class ProductsService {
       throw new NotFoundException(`No Product with id ${id}`);
     }
 
+    await this.logsService.logAction({
+      userEmail,
+      action: `Added to product ${product.name}`,
+      resourceType: 'product',
+      resourceId: product.id.toString(),
+      payload: { added: amount },
+    });
+
     return product;
   }
 
-  async removeStock(id: number, amount: number): Promise<void> {
+  async removeStock(
+    id: number,
+    amount: number,
+    userEmail: string,
+  ): Promise<void> {
     const product = await this.productModel.findOne({ id }).exec();
     if (!product) throw new NotFoundException(`No Product with id ${id}`);
     if (product.stock - amount < 0) {
       throw new BadRequestException(`Cannot reduce the stock below Zero`);
     }
-    await this.productModel
-      .updateOne({ id }, { $inc: { stock: -amount } })
-      .exec();
+    if (product.stock - amount === 0) {
+      await this.productModel
+        .updateOne({ id }, { $set: { isEmpty: true } })
+        .exec();
+      await this.productModel
+        .updateOne({ id }, { $inc: { stock: -amount } })
+        .exec();
+    } else {
+      await this.productModel
+        .updateOne({ id }, { $inc: { stock: -amount } })
+        .exec();
+    }
+
+    await this.logsService.logAction({
+      userEmail,
+      action: `Removed from product ${product.name}`,
+      resourceType: 'product',
+      resourceId: product.id.toString(),
+      payload: { removed: amount },
+    });
   }
 
   async findByBarcode(barcode: string): Promise<Product | null> {
