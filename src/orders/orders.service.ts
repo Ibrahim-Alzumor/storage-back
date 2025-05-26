@@ -45,10 +45,10 @@ export class OrdersService {
       userEmail,
       action: `Placed order with ${dto.items.length} items`,
       resourceType: 'order',
-      payload: {
+      payload: JSON.stringify({
         items: dto.items,
         timestamp,
-      },
+      }),
     });
 
     return savedOrder;

@@ -29,7 +29,7 @@ export class ProductsService {
       action: `Added product ${created.name}`,
       resourceType: 'product',
       resourceId: created.id.toString(),
-      payload: dto,
+      payload: JSON.stringify(dto),
     });
 
     return await created.save();
@@ -68,10 +68,9 @@ export class ProductsService {
       userEmail,
       action: `Updated product ${updated.name}`,
       resourceType: 'product',
-      resourceId: updated.id.toString(),
-      payload: dto,
+      resourceId: id.toString(),
+      payload: JSON.stringify(dto),
     });
-
     return updated;
   }
 
@@ -108,7 +107,7 @@ export class ProductsService {
       action: `Added to product ${product.name}`,
       resourceType: 'product',
       resourceId: product.id.toString(),
-      payload: { added: amount },
+      payload: JSON.stringify({ added: amount }),
     });
 
     return product;
@@ -142,12 +141,11 @@ export class ProductsService {
       action: `Removed from product ${product.name}`,
       resourceType: 'product',
       resourceId: product.id.toString(),
-      payload: { removed: amount },
+      payload: JSON.stringify({ removed: amount }),
     });
   }
 
   async findByBarcode(barcode: string): Promise<Product | null> {
-    console.log('Searching for barcode:', barcode);
     return this.productModel.findOne({ barcode }).exec();
   }
 

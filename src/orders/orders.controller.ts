@@ -10,7 +10,6 @@ export class OrdersController {
 
   @Post()
   async create(@Req() req, @Body() dto: CreateOrderDto) {
-    console.log('decoded User:', req.user);
     const userEmail = req.user.email;
     return this.ordersService.createOrder(dto, userEmail);
   }
