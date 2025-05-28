@@ -80,6 +80,11 @@ export class ProductsController {
     return this.productsService.findByBarcode(barcodeId);
   }
 
+  @Get('find-barcodes')
+  findAllValidBarcodes() {
+    return this.productsService.findAllValidBarcodes();
+  }
+
   @Put(':id/barcode')
   assignBarcode(
     @Param('id', ParseIntPipe) id: number,

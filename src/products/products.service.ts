@@ -8,7 +8,6 @@ import { Model } from 'mongoose';
 import { Product } from './schemas/product.schema';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { LogsService } from '../logs/logs.service';
 
 @Injectable()
@@ -22,7 +21,7 @@ export class ProductsService {
     const created = new this.productModel(dto);
     created.id = Date.now();
     created.isEmpty = false;
-    created.barcode = randomStringGenerator();
+    created.barcode = this.generateRandomString(100);
 
     await this.logsService.logAction({
       userEmail,
@@ -159,5 +158,26 @@ export class ProductsService {
     await this.productModel
       .updateOne({ id }, { $set: { barcode: barcodeId } })
       .exec();
+  }
+
+  async findAllValidBarcodes(): Promise<Product[]> {
+    const products = await this.productModel.find().exec();
+
+    return products.filter(
+      (product) => product.barcode && product.barcode.length > 80,
+    );
+  }
+
+  private generateRandomString(length: number): string {
+    const characters =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    const charactersLength = characters.length;
+
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+
+    return result;
   }
 }
