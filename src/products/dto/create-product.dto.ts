@@ -19,5 +19,8 @@ export class CreateProductDto {
   description?: string;
   isEmpty?: boolean;
   @IsOptional()
-  barcode?: number;
+  barcode?: string;
+  @IsString()
+  @IsOptional()
+  unit?: string;
 }

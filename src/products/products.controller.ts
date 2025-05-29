@@ -9,12 +9,14 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductsService } from './products.service';
 import { AuthGuard } from '../auth/auth.guard';
+import { Product } from './schemas/product.schema';
 
 @UseGuards(AuthGuard)
 @Controller('products')
@@ -22,8 +24,8 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  create(@Body() dto: CreateProductDto) {
-    return this.productsService.create(dto);
+  create(@Body() dto: CreateProductDto, @Req() req) {
+    return this.productsService.create(dto, req.user.email);
   }
 
   @Get()
@@ -42,42 +44,52 @@ export class ProductsController {
   }
 
   @Put(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateProductDto) {
-    return this.productsService.update(id, dto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateProductDto,
+    @Req() req,
+  ) {
+    return this.productsService.update(id, dto, req.user.email);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.productsService.remove(id);
+  remove(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return this.productsService.remove(id, req.user.email);
   }
 
   @Patch(':id/add-stock')
-  addStock(
+  async addStock(
     @Param('id', ParseIntPipe) id: number,
     @Body('amount', ParseIntPipe) amount: number,
-  ) {
-    return this.productsService.addStock(id, amount);
+    @Req() req,
+  ): Promise<Product> {
+    return await this.productsService.addStock(id, amount, req.user.email);
   }
 
   @Patch(':id/remove-stock')
   removeStock(
     @Param('id', ParseIntPipe) id: number,
     @Body('amount', ParseIntPipe) amount: number,
+    @Req() req,
   ) {
-    return this.productsService.removeStock(id, amount);
+    return this.productsService.removeStock(id, amount, req.user.email);
   }
 
   @Get('by-barcode/:barcodeId')
-  getByBarcode(@Param('barcodeId') barcodeId: number) {
+  getByBarcode(@Param('barcodeId') barcodeId: string) {
     return this.productsService.findByBarcode(barcodeId);
+  }
+
+  @Get('find-barcodes')
+  findAllValidBarcodes() {
+    return this.productsService.findAllValidBarcodes();
   }
 
   @Put(':id/barcode')
   assignBarcode(
     @Param('id', ParseIntPipe) id: number,
-    @Body('barcodeId') barcodeId: number,
+    @Body('barcodeId') barcodeId: string,
   ) {
-    console.log(id);
     return this.productsService.assignBarcode(id, barcodeId);
   }
 }

@@ -4,15 +4,15 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authSvc: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('register')
   async register(@Body() dto: CreateUserDto) {
-    return this.authSvc.register(dto);
+    return this.authService.register(dto);
   }
 
   @Post('login')
   login(@Body() body: { email: string; password: string }) {
-    return this.authSvc.login(body);
+    return this.authService.login(body);
   }
 }
