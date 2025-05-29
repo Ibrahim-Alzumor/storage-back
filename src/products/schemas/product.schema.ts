@@ -21,6 +21,8 @@ export class Product {
   isEmpty: boolean;
   @Prop({ unique: true })
   barcode: string;
+  @Prop()
+  unit: string;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

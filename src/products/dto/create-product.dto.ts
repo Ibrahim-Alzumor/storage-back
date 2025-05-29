@@ -20,4 +20,7 @@ export class CreateProductDto {
   isEmpty?: boolean;
   @IsOptional()
   barcode?: string;
+  @IsString()
+  @IsOptional()
+  unit?: string;
 }
