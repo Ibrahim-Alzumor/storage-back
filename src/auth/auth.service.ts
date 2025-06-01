@@ -18,6 +18,9 @@ export class AuthService {
 
   async login(creds: { email: string; password: string }) {
     const user = await this.validateUser(creds.email, creds.password);
+    if (user.active === false) {
+      throw new UnauthorizedException('Account is disabled');
+    }
     if (!user) throw new UnauthorizedException('Invalid Credentials');
     const payload = {
       email: user.email,

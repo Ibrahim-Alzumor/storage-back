@@ -83,10 +83,8 @@ export class ProductsService {
 
   async remove(id: number, userEmail: string): Promise<void> {
     const product = await this.findOne(id);
-    const res = await this.productModel
-      .updateOne({ id }, { $set: { isEmpty: true, stock: 0 } })
-      .exec();
-    if (res.matchedCount === 0)
+    const res = await this.productModel.deleteOne({ id }).exec();
+    if (res.deletedCount === 0)
       throw new NotFoundException(`No Product with id ${id}`);
     await this.logsService.logAction({
       userEmail,
