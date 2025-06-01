@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { UnitsService } from './units.service';
 import { CreateUnitDto } from './dto/create-unit.dto';
 import { AuthGuard } from '../auth/auth.guard';
@@ -11,6 +19,11 @@ export class UnitsController {
   @Get()
   findAll() {
     return this.unitsService.findAll();
+  }
+
+  @Get(':id')
+  findById(@Param('id') id: string) {
+    return this.unitsService.findById(id);
   }
 
   @Post()
