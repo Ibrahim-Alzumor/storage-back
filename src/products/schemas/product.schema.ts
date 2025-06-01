@@ -14,7 +14,7 @@ export class Product {
   @Prop({ required: true, default: 0 })
   stock: number;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Category' })
-  categoryI: Category;
+  categoryId: Category;
   @Prop()
   image: string;
   @Prop()
@@ -24,7 +24,7 @@ export class Product {
   @Prop({ unique: true })
   barcode: string;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Unit' })
-  unit: Unit;
+  unitId: Unit;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

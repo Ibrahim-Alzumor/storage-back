@@ -18,10 +18,14 @@ export class ProductsService {
   ) {}
 
   async create(dto: CreateProductDto, userEmail: string): Promise<Product> {
-    const created = new this.productModel(dto);
-    created.id = Date.now();
-    created.isEmpty = false;
-    created.barcode = this.generateRandomString(100);
+    const productData = {
+      ...dto,
+      id: Date.now(),
+      isEmpty: false,
+      barcode: this.generateRandomString(100),
+    };
+
+    const created = new this.productModel(productData);
 
     await this.logsService.logAction({
       userEmail,
@@ -57,9 +61,13 @@ export class ProductsService {
     dto: UpdateProductDto,
     userEmail: string,
   ): Promise<Product> {
-    dto.isEmpty = false;
+    const updateData = {
+      ...dto,
+      isEmpty: false,
+    };
+
     const updated = await this.productModel
-      .findOneAndUpdate({ id }, dto, { new: true })
+      .findOneAndUpdate({ id }, updateData, { new: true })
       .exec();
     if (!updated) throw new NotFoundException(`No Product with id ${id}`);
 
