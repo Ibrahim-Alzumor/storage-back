@@ -16,7 +16,7 @@ export class Product {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Category' })
   categoryId: Category;
   @Prop()
-  image: string;
+  images: string[];
   @Prop()
   description: string;
   @Prop({ default: false })
