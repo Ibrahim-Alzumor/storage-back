@@ -13,11 +13,10 @@ export class CreateProductDto {
   categoryId: string;
   @IsString()
   @IsOptional()
-  image?: string;
+  images?: string[];
   @IsString()
   @IsOptional()
   description?: string;
-  isEmpty?: boolean;
   @IsOptional()
   barcode?: string;
   @IsString()
