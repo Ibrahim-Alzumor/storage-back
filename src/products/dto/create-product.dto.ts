@@ -10,7 +10,7 @@ export class CreateProductDto {
   stock: number;
   @IsNotEmpty()
   @IsString()
-  category: string;
+  categoryId: string;
   @IsString()
   @IsOptional()
   image?: string;
@@ -19,5 +19,8 @@ export class CreateProductDto {
   description?: string;
   isEmpty?: boolean;
   @IsOptional()
-  barcode?: number;
+  barcode?: string;
+  @IsString()
+  @IsNotEmpty()
+  unitId: string;
 }

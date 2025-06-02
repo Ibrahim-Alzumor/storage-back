@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsEmail,
   IsNotEmpty,
   IsNumber,
@@ -27,4 +28,6 @@ export class CreateUserDto {
   @IsNumber()
   @IsNotEmpty()
   clearanceLevel: number;
+  @IsBoolean()
+  active: boolean;
 }
