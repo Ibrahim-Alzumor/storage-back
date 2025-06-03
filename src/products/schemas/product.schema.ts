@@ -19,8 +19,6 @@ export class Product {
   images: string[];
   @Prop()
   description: string;
-  @Prop({ default: false })
-  isEmpty: boolean;
   @Prop({ unique: true })
   barcode: string;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Unit' })

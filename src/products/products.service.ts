@@ -21,7 +21,6 @@ export class ProductsService {
     const productData = {
       ...dto,
       id: Date.now(),
-      isEmpty: false,
       barcode: this.generateRandomString(100),
     };
 
@@ -39,7 +38,7 @@ export class ProductsService {
   }
 
   async findAll(): Promise<Product[]> {
-    return this.productModel.find({ isEmpty: false }).exec();
+    return this.productModel.find().exec();
   }
 
   async findOne(id: number): Promise<Product> {
@@ -63,7 +62,6 @@ export class ProductsService {
   ): Promise<Product> {
     const updateData = {
       ...dto,
-      isEmpty: false,
     };
 
     const updated = await this.productModel
@@ -128,18 +126,10 @@ export class ProductsService {
     if (product.stock - amount < 0) {
       throw new BadRequestException(`Cannot reduce the stock below Zero`);
     }
-    if (product.stock - amount === 0) {
-      await this.productModel
-        .updateOne({ id }, { $set: { isEmpty: true } })
-        .exec();
-      await this.productModel
-        .updateOne({ id }, { $inc: { stock: -amount } })
-        .exec();
-    } else {
-      await this.productModel
-        .updateOne({ id }, { $inc: { stock: -amount } })
-        .exec();
-    }
+
+    await this.productModel
+      .updateOne({ id }, { $inc: { stock: -amount } })
+      .exec();
 
     await this.logsService.logAction({
       userEmail,
