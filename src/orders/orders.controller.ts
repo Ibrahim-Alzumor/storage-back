@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -20,6 +31,11 @@ export class OrdersController {
     return this.ordersService.findAll();
   }
 
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.ordersService.findOne(id);
+  }
+
   @Get('my')
   async findMine(@Req() req) {
     return this.ordersService.findByUserEmail(req.user.email);
@@ -36,7 +52,10 @@ export class OrdersController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: number, @Body() updateOrderDto: UpdateOrderDto) {
+  async update(
+    @Param('id') id: number,
+    @Body() updateOrderDto: UpdateOrderDto,
+  ) {
     return this.ordersService.updateOrder(id, updateOrderDto);
   }
 

@@ -67,6 +67,12 @@ export class OrdersService {
     return this.orderModel.find().sort({ date: -1 }).exec();
   }
 
+  async findOne(id: number): Promise<Order> {
+    const order = await this.orderModel.findOne({ id }).exec();
+    if (!order) throw new NotFoundException(`No Order with id ${id}`);
+    return order;
+  }
+
   findByUserEmail(userEmail: string): Promise<Order[]> {
     return this.orderModel.find({ userEmail }).exec();
   }
