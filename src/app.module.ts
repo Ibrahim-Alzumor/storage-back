@@ -23,7 +23,7 @@ import { ClearanceLevelModule } from './clearance-level/clearance-level.module';
       imports: [ConfigModule],
       useFactory: async () => ({
         secret: jwtConstants.secret,
-        signOptions: { expiresIn: '100m' },
+        signOptions: { expiresIn: '1000m' },
       }),
       inject: [ConfigService],
     }),

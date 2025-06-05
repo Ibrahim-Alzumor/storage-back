@@ -24,6 +24,17 @@ export class ClearanceLevelController {
     return this.clearanceLevelService.getClearanceLevels();
   }
 
+  @Get(':userClearanceLevel/has-permission/:functionId')
+  async hasPermission(
+    @Param('userClearanceLevel') userClearanceLevel: number,
+    @Param('functionId') functionId: string,
+  ): Promise<boolean> {
+    return this.clearanceLevelService.hasPermission(
+      userClearanceLevel,
+      functionId,
+    );
+  }
+
   @Get('functions')
   async getFunctions(): Promise<FunctionPermissionDocument[]> {
     return this.clearanceLevelService.getFunctions();

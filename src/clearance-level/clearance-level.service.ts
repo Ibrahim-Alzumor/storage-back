@@ -1,12 +1,14 @@
-import {
-  Injectable,
-  NotFoundException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ClearanceLevel, ClearanceLevelDocument } from './schemas/clearance-level.schema';
-import { FunctionPermission, FunctionPermissionDocument } from './schemas/function-permission.schema';
+import {
+  ClearanceLevel,
+  ClearanceLevelDocument,
+} from './schemas/clearance-level.schema';
+import {
+  FunctionPermission,
+  FunctionPermissionDocument,
+} from './schemas/function-permission.schema';
 import { CreateClearanceLevelDto } from './dto/create-clearance-level.dto';
 import { UpdateClearanceLevelDto } from './dto/update-clearance-level.dto';
 import { CreateFunctionPermissionDto } from './dto/create-function-permission.dto';
@@ -27,7 +29,9 @@ export class ClearanceLevelService {
   }
 
   async getClearanceLevel(level: number): Promise<ClearanceLevelDocument> {
-    const clearanceLevel = await this.clearanceLevelModel.findOne({ level }).exec();
+    const clearanceLevel = await this.clearanceLevelModel
+      .findOne({ level })
+      .exec();
     if (!clearanceLevel) {
       throw new NotFoundException(`Clearance level ${level} not found`);
     }
@@ -118,27 +122,34 @@ export class ClearanceLevelService {
   ): Promise<FunctionPermissionDocument[]> {
     try {
       const existingFunctions = await this.getFunctions();
-      const existingIds = existingFunctions.map(f => f.id);
-      const newFunctions = functions.filter(f => !existingIds.includes(f.id));
+      const existingIds = existingFunctions.map((f) => f.id);
+      const newFunctions = functions.filter((f) => !existingIds.includes(f.id));
 
       if (newFunctions.length === 0) {
         return [];
       }
 
-      const createdFunctions = await Promise.all(
-        newFunctions.map(f => this.createFunction(f, userEmail))
+      return await Promise.all(
+        newFunctions.map((f) => this.createFunction(f, userEmail)),
       );
-
-      return createdFunctions;
     } catch (error) {
-      Logger.error(`Error creating functions: ${error.message}`, error.stack, 'ClearanceLevelService');
+      Logger.error(
+        `Error creating functions: ${error.message}`,
+        error.stack,
+        'ClearanceLevelService',
+      );
       return [];
     }
   }
 
-  async hasPermission(userClearanceLevel: number, functionId: string): Promise<boolean> {
-    const clearanceLevel = await this.clearanceLevelModel.findOne({ level: userClearanceLevel }).exec();
-    return clearanceLevel ? clearanceLevel.allowedFunctions.includes(functionId) : false;
+  async hasPermission(
+    userClearanceLevel: number,
+    functionId: string,
+  ): Promise<boolean> {
+    const clearanceLevel = await this.getClearanceLevel(userClearanceLevel);
+    return clearanceLevel
+      ? clearanceLevel.allowedFunctions.includes(functionId)
+      : false;
   }
 
   async addFunctionToClearanceLevel(
