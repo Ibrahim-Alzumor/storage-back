@@ -12,6 +12,7 @@ import { OrdersModule } from './orders/orders.module';
 import { LogsModule } from './logs/logs.module';
 import { UnitsModule } from './units/units.module';
 import { CategoriesModule } from './categories/categories.module';
+import { ClearanceLevelModule } from './clearance-level/clearance-level.module';
 
 @Module({
   imports: [
@@ -33,6 +34,8 @@ import { CategoriesModule } from './categories/categories.module';
     LogsModule,
     CategoriesModule,
     UnitsModule,
+    ClearanceLevelModule,
   ],
+  providers: [],
 })
 export class AppModule {}
