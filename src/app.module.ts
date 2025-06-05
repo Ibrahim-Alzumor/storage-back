@@ -7,11 +7,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import * as process from 'node:process';
-import { jwtConstants } from './auth/constants';
+import { jwtConstants } from './constants';
 import { OrdersModule } from './orders/orders.module';
 import { LogsModule } from './logs/logs.module';
 import { UnitsModule } from './units/units.module';
 import { CategoriesModule } from './categories/categories.module';
+import { ClearanceLevelModule } from './clearance-level/clearance-level.module';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { CategoriesModule } from './categories/categories.module';
       imports: [ConfigModule],
       useFactory: async () => ({
         secret: jwtConstants.secret,
-        signOptions: { expiresIn: '100m' },
+        signOptions: { expiresIn: '1000m' },
       }),
       inject: [ConfigService],
     }),
@@ -33,6 +34,8 @@ import { CategoriesModule } from './categories/categories.module';
     LogsModule,
     CategoriesModule,
     UnitsModule,
+    ClearanceLevelModule,
   ],
+  providers: [],
 })
 export class AppModule {}
