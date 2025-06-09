@@ -9,6 +9,10 @@ import { Product } from './schemas/product.schema';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { LogsService } from '../logs/logs.service';
+import {
+  PaginationOptions,
+  PaginationResult,
+} from '../interface/pagination-result.interface';
 
 @Injectable()
 export class ProductsService {
@@ -37,8 +41,20 @@ export class ProductsService {
     return await created.save();
   }
 
-  async findAll(): Promise<Product[]> {
-    return this.productModel.find().exec();
+  async findAll(opts: PaginationOptions): Promise<PaginationResult<Product>> {
+    const { page, limit } = opts;
+    const skip = (page - 1) * limit;
+
+    const total = await this.productModel.countDocuments().exec();
+
+    const items = await this.productModel.find().skip(skip).limit(limit).exec();
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+    };
   }
 
   async findOne(id: number): Promise<Product> {
@@ -47,12 +63,24 @@ export class ProductsService {
     return prod;
   }
 
-  async findByName(name: string): Promise<Product[]> {
-    return this.productModel
-      .find({
-        name: { $regex: name, $options: 'i' },
-      })
+  async findByName(
+    name: string,
+    opts: PaginationOptions,
+  ): Promise<PaginationResult<Product>> {
+    const { page, limit } = opts;
+    const skip = (page - 1) * limit;
+
+    const filter = { name: { $regex: name, $options: 'i' } };
+
+    const total = await this.productModel.countDocuments(filter).exec();
+
+    const items = await this.productModel
+      .find(filter)
+      .skip(skip)
+      .limit(limit)
       .exec();
+
+    return { items, total, page, limit };
   }
 
   async update(
@@ -156,12 +184,24 @@ export class ProductsService {
       .exec();
   }
 
-  async findAllValidBarcodes(): Promise<Product[]> {
-    const products = await this.productModel.find().exec();
+  async findAllValidBarcodes(
+    opts: PaginationOptions,
+  ): Promise<PaginationResult<Product>> {
+    const { page, limit } = opts;
+    const skip = (page - 1) * limit;
 
-    return products.filter(
-      (product) => product.barcode && product.barcode.length > 80,
-    );
+    const filter = {
+      $expr: { $gt: [{ $strLenCP: '$barcode' }, 80] },
+    };
+
+    const total = await this.productModel.countDocuments(filter).exec();
+    const items = await this.productModel
+      .find(filter)
+      .skip(skip)
+      .limit(limit)
+      .exec();
+
+    return { items, total, page, limit };
   }
 
   private generateRandomString(length: number): string {

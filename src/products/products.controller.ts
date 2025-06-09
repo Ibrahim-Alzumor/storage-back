@@ -17,6 +17,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductsService } from './products.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { Product } from './schemas/product.schema';
+import { PaginationResult } from '../interface/pagination-result.interface';
 
 @UseGuards(AuthGuard)
 @Controller('products')
@@ -29,13 +30,22 @@ export class ProductsController {
   }
 
   @Get()
-  findAll() {
-    return this.productsService.findAll();
+  async findAll(
+    @Query('page', ParseIntPipe) page = 1,
+    @Query('limit', ParseIntPipe) limit = 50,
+  ): Promise<PaginationResult<Product>> {
+    limit = Math.min(limit, 200);
+    return this.productsService.findAll({ page, limit });
   }
 
   @Get('search')
-  async findByName(@Query('name') name: string) {
-    return this.productsService.findByName(name);
+  async findByName(
+    @Query('name') name: string,
+    @Query('page', ParseIntPipe) page = 1,
+    @Query('limit', ParseIntPipe) limit = 50,
+  ): Promise<PaginationResult<Product>> {
+    limit = Math.min(limit, 200);
+    return this.productsService.findByName(name, { page, limit });
   }
 
   @Get(':id')
@@ -81,8 +91,12 @@ export class ProductsController {
   }
 
   @Get('find-barcodes')
-  findAllValidBarcodes() {
-    return this.productsService.findAllValidBarcodes();
+  async findAllValidBarcodes(
+    @Query('page', ParseIntPipe) page = 1,
+    @Query('limit', ParseIntPipe) limit = 50,
+  ): Promise<PaginationResult<Product>> {
+    limit = Math.min(limit, 200);
+    return this.productsService.findAllValidBarcodes({ page, limit });
   }
 
   @Put(':id/barcode')
