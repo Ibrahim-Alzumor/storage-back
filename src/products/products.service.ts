@@ -9,6 +9,10 @@ import { Product } from './schemas/product.schema';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { LogsService } from '../logs/logs.service';
+import {
+  PaginationOptions,
+  PaginationResult,
+} from '../interface/pagination-result.interface';
 
 @Injectable()
 export class ProductsService {
@@ -21,7 +25,6 @@ export class ProductsService {
     const productData = {
       ...dto,
       id: Date.now(),
-      isEmpty: false,
       barcode: this.generateRandomString(100),
     };
 
@@ -38,8 +41,20 @@ export class ProductsService {
     return await created.save();
   }
 
-  async findAll(): Promise<Product[]> {
-    return this.productModel.find({ isEmpty: false }).exec();
+  async findAll(opts: PaginationOptions): Promise<PaginationResult<Product>> {
+    const { page, limit } = opts;
+    const skip = (page - 1) * limit;
+
+    const total = await this.productModel.countDocuments().exec();
+
+    const items = await this.productModel.find().skip(skip).limit(limit).exec();
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+    };
   }
 
   async findOne(id: number): Promise<Product> {
@@ -48,12 +63,24 @@ export class ProductsService {
     return prod;
   }
 
-  async findByName(name: string): Promise<Product[]> {
-    return this.productModel
-      .find({
-        name: { $regex: name, $options: 'i' },
-      })
+  async findByName(
+    name: string,
+    opts: PaginationOptions,
+  ): Promise<PaginationResult<Product>> {
+    const { page, limit } = opts;
+    const skip = (page - 1) * limit;
+
+    const filter = { name: { $regex: name, $options: 'i' } };
+
+    const total = await this.productModel.countDocuments(filter).exec();
+
+    const items = await this.productModel
+      .find(filter)
+      .skip(skip)
+      .limit(limit)
       .exec();
+
+    return { items, total, page, limit };
   }
 
   async update(
@@ -63,7 +90,6 @@ export class ProductsService {
   ): Promise<Product> {
     const updateData = {
       ...dto,
-      isEmpty: false,
     };
 
     const updated = await this.productModel
@@ -128,18 +154,10 @@ export class ProductsService {
     if (product.stock - amount < 0) {
       throw new BadRequestException(`Cannot reduce the stock below Zero`);
     }
-    if (product.stock - amount === 0) {
-      await this.productModel
-        .updateOne({ id }, { $set: { isEmpty: true } })
-        .exec();
-      await this.productModel
-        .updateOne({ id }, { $inc: { stock: -amount } })
-        .exec();
-    } else {
-      await this.productModel
-        .updateOne({ id }, { $inc: { stock: -amount } })
-        .exec();
-    }
+
+    await this.productModel
+      .updateOne({ id }, { $inc: { stock: -amount } })
+      .exec();
 
     await this.logsService.logAction({
       userEmail,
@@ -166,12 +184,24 @@ export class ProductsService {
       .exec();
   }
 
-  async findAllValidBarcodes(): Promise<Product[]> {
-    const products = await this.productModel.find().exec();
+  async findAllValidBarcodes(
+    opts: PaginationOptions,
+  ): Promise<PaginationResult<Product>> {
+    const { page, limit } = opts;
+    const skip = (page - 1) * limit;
 
-    return products.filter(
-      (product) => product.barcode && product.barcode.length > 80,
-    );
+    const filter = {
+      $expr: { $gt: [{ $strLenCP: '$barcode' }, 80] },
+    };
+
+    const total = await this.productModel.countDocuments(filter).exec();
+    const items = await this.productModel
+      .find(filter)
+      .skip(skip)
+      .limit(limit)
+      .exec();
+
+    return { items, total, page, limit };
   }
 
   private generateRandomString(length: number): string {

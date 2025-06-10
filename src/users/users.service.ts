@@ -5,6 +5,10 @@ import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  PaginationOptions,
+  PaginationResult,
+} from '../interface/pagination-result.interface';
 
 @Injectable()
 export class UsersService {
@@ -22,22 +26,38 @@ export class UsersService {
     return this.userModel.findOne({ email }).exec();
   }
 
-  async findAll(): Promise<UserDocument[]> {
-    return this.userModel.find().exec();
+  async findAll(
+    opts: PaginationOptions,
+  ): Promise<PaginationResult<UserDocument>> {
+    const { page, limit } = opts;
+    const skip = (page - 1) * limit;
+    const total = await this.userModel.countDocuments().exec();
+    const items = await this.userModel.find().skip(skip).limit(limit).exec();
+    return { items, total, page, limit };
   }
 
-  async search(term: string): Promise<UserDocument[]> {
+  async search(
+    term: string,
+    opts: PaginationOptions,
+  ): Promise<PaginationResult<UserDocument>> {
+    const { page, limit } = opts;
+    const skip = (page - 1) * limit;
     const regex = new RegExp(term, 'i');
-    return this.userModel
-      .find({
-        $or: [
-          { firstName: regex },
-          { lastName: regex },
-          { email: regex },
-          { jobTitle: regex },
-        ],
-      })
+    const filter = {
+      $or: [
+        { firstName: regex },
+        { lastName: regex },
+        { email: regex },
+        { jobTitle: regex },
+      ],
+    };
+    const total = await this.userModel.countDocuments(filter).exec();
+    const items = await this.userModel
+      .find(filter)
+      .skip(skip)
+      .limit(limit)
       .exec();
+    return { items, total, page, limit };
   }
 
   async update(

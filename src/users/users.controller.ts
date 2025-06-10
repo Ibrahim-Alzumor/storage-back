@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Put,
   Query,
@@ -23,13 +24,22 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  findAll(
+    @Query('page', ParseIntPipe) page = 1,
+    @Query('limit', ParseIntPipe) limit = 50,
+  ) {
+    limit = Math.min(limit, 200);
+    return this.usersService.findAll({ page, limit });
   }
 
   @Get('search')
-  search(@Query('name') name: string) {
-    return this.usersService.search(name);
+  search(
+    @Query('name') name: string,
+    @Query('page', ParseIntPipe) page = 1,
+    @Query('limit', ParseIntPipe) limit = 50,
+  ) {
+    limit = Math.min(limit, 200);
+    return this.usersService.search(name, { page, limit });
   }
 
   @Put(':email')

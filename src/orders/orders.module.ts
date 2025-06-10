@@ -6,6 +6,7 @@ import { Order, OrderSchema } from './schemas/order.schema';
 import { ProductsModule } from '../products/products.module';
 import { AuthModule } from '../auth/auth.module';
 import { LogsModule } from '../logs/logs.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { LogsModule } from '../logs/logs.module';
     ProductsModule,
     AuthModule,
     LogsModule,
+    UsersModule,
   ],
   providers: [OrdersService],
   controllers: [OrdersController],
